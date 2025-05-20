@@ -1,5 +1,137 @@
-import React, {useState, useEffect} from "react";
+import { useEffect, useState } from "react";
+import novaLogo from "../../img/logo-e1729683266649.png";
 
+const Home = () => {
+	const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiREVNT19OT1ZBX0NBRkUiLCJzdWIiOiJERU1PX05PVkFfQ0FGRSIsImp0aSI6IjQ5MGQ3Mjk5LWY1Y2YtNDI3MS1hOWE5LTg2ZmE0MGVlNTVjMyIsImlhdCI6MTc0Nzc3MDIyMSwiRGF0YWJhc2UiOiJQT1NfREVNT19OT1ZBX0NBRkUiLCJyb2wiOiJhcGlfYWNjZXNzIiwiaWQiOiI2MTIzIiwibmJmIjoxNzQ3NzcwMjIxLCJleHAiOjE4NDgwMDk2MDEsImlzcyI6InJlbGVhc2UiLCJhdWQiOiJodHRwczovL2JldGEuYXBpLm5vdmFwb2ludG9mc2FsZS5jb20vIn0.yF79mZu1fCkte_EopiSfnTrqr7vwN8kVvE-6iM1ZXog'
+    const [authData, setAuthData] = useState(null);
+    const [customers, setCustomers] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Authentication
+    const authenticate = async () => {
+        try {
+            const response = await fetch("https://beta.api.novapointofsale.com/auth/login", {
+                method: 'POST',
+                headers: { 
+                    'accept': 'application/json', 
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: "DEMO_NOVA_CAFE",
+                    password: "KSMQYcm6La",
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Login failed: ${response.status}`);
+            }
+            console.log('Successfully Logged in')
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Authentication error:", error);
+            throw error;
+        }
+    };
+
+    //API fetch with auth token
+    const fetchWithAuth = async (url, options = {}) => {
+        try {
+            // Check if token exists and is not expired
+            if (!authData || new Date() > new Date(authData.expires)) {
+                const newAuthData = await authenticate();
+                setAuthData(newAuthData);
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    ...options.headers
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error("API request error:", error);
+            throw error;
+        }
+    };
+
+    // Get Customers
+    const getCustomers = async () => {
+        try {
+            const data = await fetchWithAuth("https://beta.api.novapointofsale.com/customers");
+            setCustomers(data);
+            return JSON.stringify(data);
+        } catch (error) {
+            setError(error.message);
+            throw error;
+        }
+    };
+
+    // Initial load
+    useEffect(() => {
+        const initialize = async () => {
+            try {
+                await getCustomers();
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initialize();
+    }, []);
+
+    if (loading) return <div className="text-center">Loading...</div>;
+    if (error) return <div className="text-center">Error: {error}</div>;
+
+    return (
+		<>
+        <div className="text-center">
+            <h1 className="text-center mt-5">Hello Rigo!</h1>
+            <p>
+                <img src={novaLogo} alt="Rigo" />
+            </p>
+            <div>
+                <h2>Customer Data Loaded</h2>
+                <button onClick={getCustomers} className="btn btn-primary">
+                    Refresh Customers
+                </button>
+                {<pre>{JSON.stringify(customers, null, 0)}</pre>}
+
+            {customers && customers.length > 0 ? (
+                customers.map((customer) => (
+                    <div key={Math.random()}>
+                        <h1>{customer.firstName || customer.name || "No name"}</h1>
+						<h3>{customer.email}</h3>
+                        {/* Add more customer details as needed */}
+                    </div>
+                ))
+            ) : (
+                <p>No customers found</p>
+            )}
+        </div>
+    </div>
+		</>
+    );
+};
+
+export default Home;
+
+
+
+
+
+/*
 //include images into your bundle
 import rigoImage from "../../img/rigo-baby.jpg";
 
@@ -12,7 +144,7 @@ const [combinedData, mergedData] = useState([]);
 
 
 //Fetch API Data for Rick and Morti
-/*
+
 useEffect(() => {
 		fetch('https://rickandmortyapi.com/api/character')
 		.then(response =>  {
@@ -30,7 +162,7 @@ useEffect(() => {
 
 '
 	}, [])
-	*/
+	
 
 const fetchData = async () => {
 	const urls = ["https://rickandmortyapi.com/api/character",
@@ -54,7 +186,6 @@ const fetchData = async () => {
 	
 useEffect(() => {
 	fetchData()
-
 }, [])
 
 	return (
@@ -75,5 +206,4 @@ useEffect(() => {
 		</div>
 	);
 };
-
-export default Home;
+*/

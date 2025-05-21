@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import novaLogo from "../../img/logo-e1729683266649.png";
+import ContactCard from './ContactCard'
 
 const Home = () => {
 	const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiREVNT19OT1ZBX0NBRkUiLCJzdWIiOiJERU1PX05PVkFfQ0FGRSIsImp0aSI6IjQ5MGQ3Mjk5LWY1Y2YtNDI3MS1hOWE5LTg2ZmE0MGVlNTVjMyIsImlhdCI6MTc0Nzc3MDIyMSwiRGF0YWJhc2UiOiJQT1NfREVNT19OT1ZBX0NBRkUiLCJyb2wiOiJhcGlfYWNjZXNzIiwiaWQiOiI2MTIzIiwibmJmIjoxNzQ3NzcwMjIxLCJleHAiOjE4NDgwMDk2MDEsImlzcyI6InJlbGVhc2UiLCJhdWQiOiJodHRwczovL2JldGEuYXBpLm5vdmFwb2ludG9mc2FsZS5jb20vIn0.yF79mZu1fCkte_EopiSfnTrqr7vwN8kVvE-6iM1ZXog'
@@ -69,6 +70,8 @@ const Home = () => {
         try {
             const data = await fetchWithAuth("https://beta.api.novapointofsale.com/customers");
             setCustomers(data);
+			console.log("Customers data structure:", data);
+
             return JSON.stringify(data);
         } catch (error) {
             setError(error.message);
@@ -97,9 +100,9 @@ const Home = () => {
     return (
 		<>
         <div className="text-center">
-            <h1 className="text-center mt-5">Hello Rigo!</h1>
+            <h1 className="text-center mt-5">Nova CRM!</h1>
             <p>
-                <img src={novaLogo} alt="Rigo" />
+                <img src={novaLogo} alt="Rigo" style={{color:'red'}} />
             </p>
             <div>
                 <h2>Customer Data Loaded</h2>
@@ -108,10 +111,10 @@ const Home = () => {
                 </button>
                 {<pre>{JSON.stringify(customers, null, 0)}</pre>}
 
-            {customers && customers.length > 0 ? (
-                customers.map((customer) => (
+            {customers?.data?.customers?.length > 0 ? (
+                customers.data.customers.map((customer) => (
                     <div key={Math.random()}>
-                        <h1>{customer.firstName || customer.name || "No name"}</h1>
+                        <h1>{customer.firstName || customer || "No name"}</h1>
 						<h3>{customer.email}</h3>
                         {/* Add more customer details as needed */}
                     </div>
@@ -119,6 +122,7 @@ const Home = () => {
             ) : (
                 <p>No customers found</p>
             )}
+			<h1>"House"</h1>
         </div>
     </div>
 		</>
